@@ -1,0 +1,153 @@
+# sudo groupadd usrp
+# sudo usermod -G usrp -a $USER
+# echo 'ACTION=="add", BUS=="usb", SYSFS{idVendor}=="fffe", SYSFS{idProduct}=="0002", GROUP:="usrp", MODE:="0660"' > tmpfile
+# sudo chown root.root tmpfile
+# sudo mv tmpfile /etc/udev/rules.d/10-usrp.rules
+
+sudo docker run --net=host --privileged -v /dev/bus/usb:/dev/bus/usb --name OAI -w /root/ -it ubuntu:14.04
+# Para interface gráfica:
+sudo ~/runOAIDocker.sh
+
+# Ctrl + D
+
+sudo docker start OAI && sudo docker exec -it OAI /bin/bash
+
+sudo apt-get update && sudo apt-get -y upgrade && sudo apt-get install -y build-essential && sudo apt-get install -y software-properties-common && sudo apt-get install -y byobu curl git htop man unzip zip vim wget subversion nano usbutils
+
+
+git config --global user.name "Gabriel Lando"
+git config --global user.email "gabriellando@hotmail.com"
+
+echo -n | openssl s_client -showcerts -connect gitlab.eurecom.fr:443 2>/dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-certificates.crt
+
+
+git clone https://gitlab.eurecom.fr/oai/openairinterface5g.git
+
+git clone https://gitlab.eurecom.fr/oai/openair-cn.git
+	# gabriellando => @
+
+
+# Ctrl + D
+
+cat /etc/hostname
+
+sudo nano /etc/hosts
+
+127.0.1.1	lando.inf.ufrgs.br	lando # eNB
+127.0.1.1	lando-vm.inf.ufrgs.br	lando-vm # Core
+
+
+sudo docker stop OAI && sudo docker start OAI && sudo docker exec -it OAI /bin/bash
+# Para interface gráfica:
+sudo ~/execOAIDocker.sh
+
+hostname -f
+
+
+cd ~/openairinterface5g
+source oaienv
+cd cmake_targets
+./build_oai -I --eNB -x --install-system-files -w USRP
+
+
+sudo apt install -y mysql-server
+	# PWD: linux
+sudo /etc/init.d/mysql start && sudo /etc/init.d/mysql status
+
+cd ~/openair-cn
+git checkout develop 
+git pull
+cd scripts
+
+# Editar script e mudar "libapache2-mod-php*" para "libapache2-mod-php5" nas linhas 732 e 739
+# nano -c ~/openair-cn/build/tools/build_helper
+
+./build_mme -i
+	# Web server to reconfigure automatically: apache2
+	# Configuring phpmyadmin:
+		# Configure database for phpmyadmin with dbconfig-common? YES
+		# Password of the database's administrative user: linux
+		# MySQL application password for phpmyadmin: linux
+		# Password confirmation: linux
+./build_hss -i 
+./build_spgw -i
+
+
+
+############## Configuring eNB machine ##############
+
+nano ~/openairinterface5g/targets/PROJECTS/GENERIC-LTE-EPC/CONF/enb.band7.tm1.usrpb210.conf
+	# MME (17-62): 143.54.12.72
+	# eNB (82): 143.54.12.225
+		#interface: br0
+
+
+
+############## Configuring EPC machine ##############
+
+sudo mkdir -p /usr/local/etc/oai/freeDiameter
+sudo cp ~/openair-cn/etc/mme.conf /usr/local/etc/oai
+sudo cp ~/openair-cn/etc/hss.conf /usr/local/etc/oai
+sudo cp ~/openair-cn/etc/spgw.conf /usr/local/etc/oai
+sudo cp ~/openair-cn/etc/acl.conf /usr/local/etc/oai/freeDiameter
+sudo cp ~/openair-cn/etc/mme_fd.conf /usr/local/etc/oai/freeDiameter
+sudo cp ~/openair-cn/etc/hss_fd.conf /usr/local/etc/oai/freeDiameter
+
+sudo nano /usr/local/etc/oai/mme.conf
+	# REALM = "inf.ufrgs.br"
+
+sudo nano /usr/local/etc/oai/spgw.conf
+
+sudo nano /usr/local/etc/oai/freeDiameter/hss_fd.conf
+	# Identity HSS = "lando-vm.inf.ufrgs.br"
+	# Realm = "inf.ufrgs.br"
+
+sudo nano /usr/local/etc/oai/freeDiameter/mme_fd.conf
+	# Identity eNB (nano) = "lando.inf.ufrgs.br"
+	# Realm = "inf.ufrgs.br"
+	# ConnectPeer= "lando-vm.inf.ufrgs.br" { ConnectTo = "127.0.0.1"; No_SCTP ; No_IPv6; Prefer_TCP; No_TLS; port = 3868;  realm = "inf.ufrgs.br";};
+
+sudo nano /usr/local/etc/oai/hss.conf
+	# MYSQL_user   = "root"
+	# MYSQL_pass   = "linux"
+
+
+
+############## Running EPC and HSS ##############
+
+cd ~/openair-cn/scripts
+./check_hss_s6a_certificate /usr/local/etc/oai/freeDiameter/ lando-vm.inf.ufrgs.br
+./check_mme_s6a_certificate /usr/local/etc/oai/freeDiameter/ lando.inf.ufrgs.br
+
+
+cd ~/openair-cn/scripts
+./build_hss -c
+./run_hss -i ~/openair-cn/src/oai_hss/db/oai_db.sql #Run only once to install database
+./run_hss  #Run this for all subsequent runs
+
+
+
+# Outro terminal:
+sudo docker exec -it OAI /bin/bash
+
+cd ~/openair-cn/scripts
+./build_mme -c
+./run_mme
+
+
+
+# Outro terminal:
+sudo docker exec -it OAI /bin/bash
+
+cd ~/openair-cn/scripts
+./build_spgw -c
+./run_spgw
+
+
+############## Running eNB ##############
+
+cd ~/openairinterface5g
+source oaienv
+./cmake_targets/build_oai -w USRP -x -c --eNB
+cd cmake_targets/lte_build_oai/build
+sudo -E ./lte-softmodem -O $OPENAIR_DIR/targets/PROJECTS/GENERIC-LTE-EPC/CONF/enb.band7.tm1.usrpb210.conf -d
