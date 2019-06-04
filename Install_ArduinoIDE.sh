@@ -35,8 +35,8 @@ fi
 # Remove old versions
 echo "Removing old versions..."
 sudo apt purge -y arduino > /dev/null 2>&1
-sudo rm -rf /opt/arduino-*
-sudo rm /usr/local/bin/arduino
+sudo rm -rf /opt/arduino-* > /dev/null 2>&1
+sudo rm /usr/local/bin/arduino > /dev/null 2>&1
 
 # Download new version
 echo 'Downloading Arduino IDE...'
