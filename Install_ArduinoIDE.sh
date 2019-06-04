@@ -56,4 +56,4 @@ sudo ldconfig
 
 echo 'Starting Arduino IDE...'
 cd ~
-sudo arduino &
+arduino &
