@@ -12,8 +12,8 @@ Some Scripts used in FUTEBOL Project
 To download and run one of the scripts, run the following commands (replacing **SCRIPT_NAME** with the desired script name):
 
 ```
-wget https://raw.githubusercontent.com/gabriel-lando/FUTEBOL-Scripts/master/**SCRIPT_NAME**
-. **SCRIPT_NAME**
+wget https://raw.githubusercontent.com/gabriel-lando/FUTEBOL-Scripts/master/SCRIPT_NAME
+. SCRIPT_NAME
 ```
 
 
