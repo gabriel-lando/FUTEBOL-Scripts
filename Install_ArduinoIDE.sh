@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Install dependencies
+echo "Installing dependencies..."
+sudo apt update > /dev/null 2>&1
+sudo apt install -y git tar wget > /dev/null 2>&1
+
 # Get latest version of Arduino IDE
 cd ~
 git init ArduinoIDE_TMP > /dev/null 2>&1
