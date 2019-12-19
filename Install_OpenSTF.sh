@@ -13,22 +13,30 @@ fi
 mkdir ~/tmp
 
 ##Install ADB
+sudo apt purge -y adb fastboot
+sudo add-apt-repository universe
 sudo apt update
-sudo apt -y install adb fastboot
+sudo apt -y install android-tools-adb android-tools-fastboot
 
 ##Install RethinkDB
+sudo apt purge -y rethinkdb
 source /etc/lsb-release && echo "deb http://download.rethinkdb.com/apt $DISTRIB_CODENAME main" | sudo tee /etc/apt/sources.list.d/rethinkdb.list
 wget -qO- https://download.rethinkdb.com/apt/pubkey.gpg | sudo apt-key add -
 sudo apt update
 sudo apt -y install rethinkdb
 
 sudo cp /etc/rethinkdb/default.conf.sample /etc/rethinkdb/instances.d/openSTF.conf
+sudo service rethinkdb restart
 
 ##Install ZeroMQ
-sudo su -c "echo 'deb http://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/Debian_9.0/ ./' >> /etc/apt/sources.list"
-wget https://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/Debian_9.0/Release.key -O- | sudo apt-key add
-sudo apt update
-sudo apt -y install libzmq3-dev
+wget https://github.com/zeromq/libzmq/releases/download/v4.3.2/zeromq-4.3.2.tar.gz
+tar xvzf zeromq-4.3.2.tar.gz
+sudo apt-get update
+sudo apt-get install -y libtool pkg-config build-essential autoconf automake uuid-dev
+cd zeromq-4.3.2
+./configure
+sudo make install
+sudo ldconfig
 
 ##Install Protocol Buffers
 cd ~/tmp
@@ -45,7 +53,7 @@ sudo ldconfig
 ##Install Yasm
 cd ~/tmp
 sudo apt -y install cmake
-git clone git://github.com/yasm/yasm.git
+git clone https://github.com/yasm/yasm.git
 cd yasm
 mkdir build && cd build
 cmake ../
