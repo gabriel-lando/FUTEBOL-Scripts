@@ -55,7 +55,7 @@ sudo ldconfig
 
 ##Install pkg-config
 cd ~/tmp
-git clone git://anongit.freedesktop.org/pkg-config
+git clone https://gitlab.freedesktop.org/pkg-config/pkg-config
 cd pkg-config
 ./autogen.sh
 ./configure --with-internal-glib
@@ -72,7 +72,7 @@ curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 sudo apt install -y --allow-downgrades nodejs=8.17.0-1nodesource1
 
 #Configure NPM
-mkdir ~/.npm-global
+mkdir -p ~/.npm-global
 npm config set prefix '~/.npm-global'
 echo "export PATH=~/.npm-global/bin:\$PATH" >> ~/.profile
 source ~/.profile
