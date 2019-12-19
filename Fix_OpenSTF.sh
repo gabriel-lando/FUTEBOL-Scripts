@@ -1,16 +1,21 @@
 #!/bin/bash
 
-sudo apt-get purge -y nodejs npm
-sudo apt-get autoremove -y
-sudo apt -y install curl
-curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-sudo apt install -y --allow-downgrades nodejs=8.17.0-1nodesource1
+mkdir -p ~/tmp
+cd ~/tmp
+wget https://github.com/zeromq/libzmq/releases/download/v4.3.2/zeromq-4.3.2.tar.gz
+tar xvzf zeromq-4.3.2.tar.gz
+sudo apt-get update && \
+sudo apt-get install -y libtool pkg-config build-essential autoconf automake uuid-dev
+cd zeromq-4.3.2
+./configure
+sudo make install
+sudo ldconfig
 
-sudo rm -rf ~/.npm-global
-mkdir -p ~/.npm-global
-npm config set prefix '~/.npm-global'
-echo "export PATH=~/.npm-global/bin:\$PATH" >> ~/.profile
-source ~/.profile
+cd ~/
+sudo rm -rf ~/tmp
+
+sudo apt update
+sudo apt -y install libzmq3-dev
 
 #Install OpenSTF
 npm install -g stf
