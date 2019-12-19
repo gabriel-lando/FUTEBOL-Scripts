@@ -69,7 +69,7 @@ sudo rm -rf ~/tmp
 #Install NodeJS v8
 sudo apt -y install curl
 curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-sudo apt -y install nodejs
+sudo apt -y install nodejs npm
 
 #Configure NPM
 mkdir ~/.npm-global
